@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* 橙红色主题色系 */
+    /* 橙红色主题色系 - 确保使用正确的 HSL 格式 */
     --primary: 14 100% 57%;  /* #FF6B35 */
     --primary-foreground: 0 0% 98%;
 
@@ -38,7 +38,7 @@
 
     --radius: 0.75rem;
 
-    /* 自定义橙红色变体 */
+    /* 自定义橙红色变体 - 使用正确的 HSL 格式 */
     --orange-red-50: 14 100% 97%;
     --orange-red-100: 14 100% 94%;
     --orange-red-200: 14 100% 87%;
@@ -50,10 +50,6 @@
     --orange-red-800: 14 83% 27%;
     --orange-red-900: 14 75% 17%;
 
-    /* 渐变定义 */
-    --gradient-primary: linear-gradient(135deg, hsl(14 100% 57%) 0%, hsl(8 89% 58%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(14 100% 97%) 0%, hsl(14 100% 94%) 100%);
-    
     /* 搜索相关色彩 */
     --search-highlight: 14 100% 87%;
     --knowledge-base: 220 13% 95%;
@@ -95,7 +91,7 @@
 /* 自定义组件样式 */
 @layer components {
   .search-gradient {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, hsl(14 100% 57%) 0%, hsl(8 89% 58%) 100%);
   }
   
   .search-card {
@@ -103,10 +99,31 @@
   }
   
   .knowledge-tag {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-red-100 text-orange-red-700 hover:bg-orange-red-200 transition-colors;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    background-color: hsl(14 100% 94%);
+    color: hsl(14 91% 37%);
+  }
+  
+  .knowledge-tag:hover {
+    background-color: hsl(14 100% 87%);
   }
   
   .search-highlight {
-    @apply bg-orange-red-200 text-orange-red-900 px-1 rounded;
+    background-color: hsl(14 100% 87%);
+    color: hsl(14 75% 17%);
+    @apply px-1 rounded;
+  }
+
+  .animate-pulse-orange {
+    animation: pulse-orange 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-orange {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .7;
+    }
   }
 }
