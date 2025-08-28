@@ -56,6 +56,8 @@ export default function Index() {
   const debouncedQuery = useDebounce(query, 300);
   const [selectedSlice, setSelectedSlice] = useState<SearchResult | null>(null);
   const [isSliceDialogOpen, setIsSliceDialogOpen] = useState(false);
+  const [searchMode, setSearchMode] = useState<string>("both");
+  const [confidenceThreshold, setConfidenceThreshold] = useState<number>(0.5);
 
   const fetchKnowledgeBases = useCallback(async () => {
     try {
@@ -164,6 +166,21 @@ export default function Index() {
     setSelectedSlice(null);
   };
 
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
+
+  const handleClearFilters = () => {
+    setSelectedTags([]);
+    setResultType("both");
+    setSearchMode("both");
+    setConfidenceThreshold(0.5);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-red-50 via-white to-orange-red-50/30">
       {/* Top Navigation Bar */}
@@ -223,11 +240,16 @@ export default function Index() {
         {(query || results.length > 0) && (
           <div className="mb-8">
             <SearchFilters
-              selectedTags={selectedTags}
-              availableTags={availableTags}
-              onTagsChange={setSelectedTags}
               resultType={resultType}
               onResultTypeChange={setResultType}
+              selectedTags={selectedTags}
+              availableTags={availableTags}
+              onTagToggle={handleTagToggle}
+              onClearFilters={handleClearFilters}
+              searchMode={searchMode}
+              onSearchModeChange={setSearchMode}
+              confidenceThreshold={confidenceThreshold}
+              onConfidenceThresholdChange={setConfidenceThreshold}
             />
           </div>
         )}
