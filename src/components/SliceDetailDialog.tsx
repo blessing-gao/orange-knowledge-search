@@ -43,6 +43,20 @@ export function SliceDetailDialog({
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
+              {/* Tags */}
+              {slice.tags && slice.tags.length > 0 && (
+                <div className="mb-3">
+                  <div className="flex flex-wrap gap-2">
+                    {slice.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-sm">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Document Title */}
               <DialogTitle className="text-xl font-semibold text-gray-900 mb-2">
                 <MarkdownHighlight content={slice.title} query={query} />
               </DialogTitle>
@@ -101,67 +115,44 @@ export function SliceDetailDialog({
         {/* Content */}
         <div className="px-6 pb-6 flex-1">
           <ScrollArea className="h-[60vh]">
-            <div className="space-y-6">
-              {/* Highlights */}
-              {slice.highlights && slice.highlights.length > 0 && (
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <h4 className="font-medium text-yellow-800 mb-2">关键片段</h4>
-                  <div className="space-y-2">
-                    {slice.highlights.map((highlight, index) => (
-                      <div key={index} className="text-sm text-yellow-700 italic">
-                        "<MarkdownHighlight content={highlight} query={query} />"
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <MarkdownHighlight 
+                content={slice.content} 
+                query={query}
+                className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+              />
+            </div>
+
+            {/* Highlights - 如果有的话，显示在内容下方 */}
+            {slice.highlights && slice.highlights.length > 0 && (
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 className="font-medium text-yellow-800 mb-2">关键片段</h4>
+                <div className="space-y-2">
+                  {slice.highlights.map((highlight, index) => (
+                    <div key={index} className="text-sm text-yellow-700 italic">
+                      "<MarkdownHighlight content={highlight} query={query} />"
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Additional Metadata - 如果需要的话 */}
+            {slice.metadata && Object.keys(slice.metadata).length > 1 && (
+              <div className="mt-6">
+                <h4 className="text-lg font-medium text-gray-900 mb-3">元数据</h4>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {Object.entries(slice.metadata).map(([key, value]) => (
+                      <div key={key}>
+                        <span className="font-medium text-gray-600">{key}:</span>
+                        <span className="ml-2 text-gray-800">{String(value)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-              )}
-
-              {/* Main Content */}
-              <div className="prose prose-sm max-w-none">
-                <h4 className="text-lg font-medium text-gray-900 mb-3">内容详情</h4>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <MarkdownHighlight 
-                    content={slice.content} 
-                    query={query}
-                    className="text-gray-700 leading-relaxed"
-                  />
-                </div>
               </div>
-
-              {/* Tags */}
-              {slice.tags && slice.tags.length > 0 && (
-                <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Tag className="w-5 h-5" />
-                    标签
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {slice.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-sm">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Additional Metadata */}
-              {slice.metadata && Object.keys(slice.metadata).length > 0 && (
-                <div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-3">元数据</h4>
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      {Object.entries(slice.metadata).map(([key, value]) => (
-                        <div key={key}>
-                          <span className="font-medium text-gray-600">{key}:</span>
-                          <span className="ml-2 text-gray-800">{String(value)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
           </ScrollArea>
         </div>
       </DialogContent>
