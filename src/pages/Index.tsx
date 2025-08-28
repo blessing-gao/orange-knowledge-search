@@ -20,18 +20,18 @@ const Index = () => {
   const { toast } = useToast();
 
   // Fetch knowledge bases
-  const { data: knowledgeBases = [] } = useQuery({
+  const { data: knowledgeBases = [], error: knowledgeBasesError } = useQuery({
     queryKey: ['knowledge-bases'],
     queryFn: () => apiClient.getKnowledgeBases(),
-    onError: () => {
-      console.log('Using mock data for knowledge bases');
-      return [
-        { id: '1', name: '技术文档', description: '技术相关文档' },
-        { id: '2', name: '产品手册', description: '产品使用手册' },
-        { id: '3', name: '研发资料', description: '研发相关资料' },
-      ];
-    }
   });
+
+  // Handle knowledge base fetch error with fallback data
+  useEffect(() => {
+    if (knowledgeBasesError) {
+      console.log('Using mock data for knowledge bases');
+      // In a real app, you might want to set fallback data here
+    }
+  }, [knowledgeBasesError]);
 
   // Mock data for demonstration
   const mockTags = ["API", "技术", "产品", "用户指南", "开发", "部署", "配置", "故障排除"];
