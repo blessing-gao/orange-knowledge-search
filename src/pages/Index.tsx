@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { Database, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SearchHeader } from "@/components/SearchHeader";
 import { SearchFilters } from "@/components/SearchFilters";
 import { SearchResults } from "@/components/SearchResults";
@@ -257,7 +258,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-red-50 via-white to-orange-red-50/30">
-      {/* Navigation Bar - 可选隐藏 */}
+      {/* Navigation Bar with Knowledge Base Selector */}
       {!hideHeader && (
         <div className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-6 py-4">
@@ -268,19 +269,41 @@ const Index = () => {
                 </div>
                 <span className="font-semibold text-gray-900">超融合智能搜索</span>
               </Link>
-              <div className="flex items-center gap-4">
-                <Link to="/knowledge-bases">
-                  <Button variant="ghost" size="sm">
-                    <Database className="w-4 h-4 mr-2" />
-                    知识库管理
-                  </Button>
-                </Link>
-                <Link to="/tasks">
-                  <Button variant="ghost" size="sm">
-                    <List className="w-4 h-4 mr-2" />
-                    任务管理
-                  </Button>
-                </Link>
+              
+              {/* Knowledge Base Selector in Header */}
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <Database className="w-5 h-5 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">知识库:</span>
+                  <Select value={selectedKnowledgeBase} onValueChange={setSelectedKnowledgeBase}>
+                    <SelectTrigger className="w-60">
+                      <SelectValue placeholder={isLoadingKB ? "加载中..." : "选择知识库"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">全部知识库</SelectItem>
+                      {knowledgeBases.map((kb) => (
+                        <SelectItem key={kb.id} value={kb.id}>
+                          {kb.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <Link to="/knowledge-bases">
+                    <Button variant="ghost" size="sm">
+                      <Database className="w-4 h-4 mr-2" />
+                      知识库管理
+                    </Button>
+                  </Link>
+                  <Link to="/tasks">
+                    <Button variant="ghost" size="sm">
+                      <List className="w-4 h-4 mr-2" />
+                      任务管理
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -294,11 +317,6 @@ const Index = () => {
           query={query}
           onQueryChange={setQuery}
           onSearch={() => performSearch(1)}
-          knowledgeBases={knowledgeBases}
-          selectedKnowledgeBase={selectedKnowledgeBase}
-          onKnowledgeBaseChange={setSelectedKnowledgeBase}
-          onManageClick={() => {}}
-          isLoadingKnowledgeBases={isLoadingKB}
           showTitle={!hideHeader}
         />
 

@@ -1,18 +1,12 @@
 
-import { Search, Database } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SearchHeaderProps {
   query: string;
   onQueryChange: (query: string) => void;
   onSearch: () => void;
-  knowledgeBases: any[];
-  selectedKnowledgeBase?: string;
-  onKnowledgeBaseChange: (id: string) => void;
-  onManageClick: () => void;
-  isLoadingKnowledgeBases?: boolean;
   showTitle?: boolean;
 }
 
@@ -20,11 +14,6 @@ export function SearchHeader({
   query,
   onQueryChange,
   onSearch,
-  knowledgeBases = [],
-  selectedKnowledgeBase,
-  onKnowledgeBaseChange,
-  onManageClick,
-  isLoadingKnowledgeBases = false,
   showTitle = true,
 }: SearchHeaderProps) {
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,36 +21,8 @@ export function SearchHeader({
     onSearch();
   };
 
-  const safeKnowledgeBases = Array.isArray(knowledgeBases) ? knowledgeBases : [];
-
   return (
     <div className="w-full space-y-6">
-      {/* Knowledge Base Selector - 放在最顶部 */}
-      <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-gray-700">
-            <Database className="w-5 h-5" />
-            <span className="font-medium">知识库:</span>
-          </div>
-          <Select value={selectedKnowledgeBase} onValueChange={onKnowledgeBaseChange}>
-            <SelectTrigger className="w-80">
-              <SelectValue placeholder={isLoadingKnowledgeBases ? "加载中..." : "选择知识库"} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">全部知识库</SelectItem>
-              {safeKnowledgeBases.map((kb) => (
-                <SelectItem key={kb.id} value={kb.id}>
-                  {kb.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button variant="outline" onClick={onManageClick}>
-          管理知识库
-        </Button>
-      </div>
-
       {showTitle && (
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -74,7 +35,7 @@ export function SearchHeader({
         </div>
       )}
 
-      {/* Search Form - 恢复原来的宽度 */}
+      {/* Search Form */}
       <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto">
         <div className="relative">
           <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 w-6 h-6" />
