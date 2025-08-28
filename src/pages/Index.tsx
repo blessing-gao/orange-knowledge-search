@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
@@ -11,6 +10,7 @@ import { SearchResults } from "@/components/SearchResults";
 import { apiClient } from "@/lib/api";
 import { SearchResult } from "@/types/api";
 import { useToast } from "@/hooks/use-toast";
+import { SliceDetailDialog } from "@/components/SliceDetailDialog";
 
 const Index = () => {
   const [searchParams] = useSearchParams();
@@ -31,6 +31,10 @@ const Index = () => {
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   
   const { toast } = useToast();
+
+  // Add dialog state
+  const [selectedSlice, setSelectedSlice] = useState<SearchResult | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   // Fetch knowledge bases with proper error handling
   const { data: knowledgeBases = [], error: knowledgeBasesError, isLoading: isLoadingKB } = useQuery({
@@ -218,6 +222,39 @@ const Index = () => {
     }
   }, [query, selectedKnowledgeBase, resultType, searchMode, selectedTags, confidenceThreshold, toast]);
 
+  const handleViewDetails = (result: SearchResult) => {
+    setSelectedSlice(result);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDetailDialogOpen(false);
+    setSelectedSlice(null);
+  };
+
+  const handlePreviousSlice = () => {
+    if (!selectedSlice) return;
+    
+    const currentIndex = searchResults.findIndex(r => r.id === selectedSlice.id);
+    if (currentIndex > 0) {
+      setSelectedSlice(searchResults[currentIndex - 1]);
+    }
+  };
+
+  const handleNextSlice = () => {
+    if (!selectedSlice) return;
+    
+    const currentIndex = searchResults.findIndex(r => r.id === selectedSlice.id);
+    if (currentIndex < searchResults.length - 1) {
+      setSelectedSlice(searchResults[currentIndex + 1]);
+    }
+  };
+
+  const getCurrentSliceIndex = () => {
+    if (!selectedSlice) return -1;
+    return searchResults.findIndex(r => r.id === selectedSlice.id);
+  };
+
   const handleTagToggle = (tag: string) => {
     setSelectedTags(prev => 
       prev.includes(tag) 
@@ -231,14 +268,6 @@ const Index = () => {
     setSearchMode('both');
     setConfidenceThreshold(0.5);
     setSelectedTags([]);
-  };
-
-  const handleViewDetails = (result: SearchResult) => {
-    toast({
-      title: "查看详情",
-      description: `正在打开: ${result.title}`,
-    });
-    // In a real app, this would navigate to a detail view
   };
 
   const handlePageChange = (page: number) => {
@@ -378,6 +407,18 @@ const Index = () => {
           </div>
         )}
       </div>
+
+      {/* Slice Detail Dialog */}
+      <SliceDetailDialog
+        isOpen={isDetailDialogOpen}
+        onClose={handleCloseDialog}
+        slice={selectedSlice}
+        query={query}
+        onPrevious={handlePreviousSlice}
+        onNext={handleNextSlice}
+        hasPrevious={getCurrentSliceIndex() > 0}
+        hasNext={getCurrentSliceIndex() < searchResults.length - 1 && getCurrentSliceIndex() >= 0}
+      />
     </div>
   );
 };
