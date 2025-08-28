@@ -23,7 +23,7 @@ export class ApiClient {
   // Knowledge Base API
   async getKnowledgeBases() {
     try {
-      const response = await this.request<{knowledge_bases: any[], total: number, page: number, size: number}>('/knowledge-bases');
+      const response = await this.request<{knowledge_bases: any[], total: number, page: number, size: number}>('/knowledge-bases/');
       console.log('API response for knowledge bases:', response);
       // Extract the knowledge_bases array from the response
       return Array.isArray(response.knowledge_bases) ? response.knowledge_bases : [];
@@ -86,17 +86,20 @@ export class ApiClient {
   // Get tags for a specific knowledge base
   async getTags(knowledgeBaseId?: string) {
     try {
-      const endpoint = knowledgeBaseId ? `/knowledge-bases/${knowledgeBaseId}/tags` : '/tags';
-      const response = await this.request<{tags: {tag: string, count: number}[]}>(endpoint);
+      if (!knowledgeBaseId) {
+        return [];
+      }
+      const endpoint = `/kb/${knowledgeBaseId}/tags`;
+      const response = await this.request<{tags: string[], total_count: number, usage_stats: Record<string, number>}>(endpoint);
       // Extract tag names from the response
-      return response.tags ? response.tags.map(t => t.tag) : [];
+      return Array.isArray(response.tags) ? response.tags : [];
     } catch (error) {
       console.error('Failed to fetch tags:', error);
       return [];
     }
   }
 
-  // Search API - 修正搜索接口调用，使用知识库特定的搜索端点
+  // Search API - 使用正确的后端搜索接口
   async search(params: {
     query: string;
     knowledge_base_id?: string;
@@ -107,75 +110,48 @@ export class ApiClient {
   }) {
     try {
       // 如果指定了知识库ID，使用知识库特定的搜索端点
-      if (params.knowledge_base_id) {
+      if (params.knowledge_base_id && params.knowledge_base_id !== 'all') {
         const searchData = {
           query: params.query,
-          result_type: params.result_type,
-          tags: params.tags,
+          search_mode: params.result_type === 'slices' ? 'chunk' : 'document',
+          tags: params.tags || [],
           page: params.page || 1,
-          limit: params.limit || 10
+          size: params.limit || 10
         };
 
         console.log('Knowledge base specific search request:', searchData);
 
-        // 尝试POST请求到知识库特定端点
-        try {
-          const response = await this.request<any>(`/knowledge-bases/${params.knowledge_base_id}/search`, {
-            method: 'POST',
-            body: JSON.stringify(searchData),
-          });
-          return response;
-        } catch (error) {
-          console.error('POST to KB search failed, trying GET:', error);
-          
-          // 如果POST失败，尝试GET请求
-          const queryParams = new URLSearchParams();
-          queryParams.append('query', params.query);
-          if (params.result_type) queryParams.append('result_type', params.result_type);
-          if (params.tags && params.tags.length > 0) queryParams.append('tags', JSON.stringify(params.tags));
-          queryParams.append('page', (params.page || 1).toString());
-          queryParams.append('limit', (params.limit || 10).toString());
-
-          return this.request<any>(`/knowledge-bases/${params.knowledge_base_id}/search?${queryParams}`);
-        }
+        // 使用POST请求到知识库搜索端点
+        const response = await this.request<any>(`/search/${params.knowledge_base_id}`, {
+          method: 'POST',
+          body: JSON.stringify(searchData),
+        });
+        return response;
       } else {
-        // 全局搜索，尝试不同的端点
+        // 全局搜索：获取第一个可用的知识库进行搜索
+        const kbs = await this.getKnowledgeBases();
+        if (kbs.length === 0) {
+          throw new Error('No knowledge bases available');
+        }
+
         const searchData = {
           query: params.query,
-          result_type: params.result_type,
-          tags: params.tags,
+          search_mode: params.result_type === 'slices' ? 'chunk' : 'document',
+          tags: params.tags || [],
           page: params.page || 1,
-          limit: params.limit || 10
+          size: params.limit || 10
         };
 
-        console.log('Global search request:', searchData);
+        console.log('Global search request (using first KB):', searchData);
 
-        // 尝试全局搜索端点
-        try {
-          const response = await this.request<any>('/search', {
-            method: 'POST',
-            body: JSON.stringify(searchData),
-          });
-          return response;
-        } catch (error) {
-          console.error('Global POST search failed, trying global GET:', error);
-          
-          const queryParams = new URLSearchParams();
-          Object.entries(params).forEach(([key, value]) => {
-            if (value !== undefined && key !== 'knowledge_base_id') {
-              if (Array.isArray(value)) {
-                queryParams.append(key, JSON.stringify(value));
-              } else {
-                queryParams.append(key, value.toString());
-              }
-            }
-          });
-
-          return this.request<any>(`/search?${queryParams}`);
-        }
+        const response = await this.request<any>(`/search/${kbs[0].id}`, {
+          method: 'POST',
+          body: JSON.stringify(searchData),
+        });
+        return response;
       }
     } catch (error) {
-      console.error('All search attempts failed:', error);
+      console.error('Search failed:', error);
       throw error;
     }
   }
@@ -190,6 +166,72 @@ export class ApiClient {
       method: 'PUT',
       body: JSON.stringify({ content }),
     });
+  }
+
+  // Task Management API
+  async getTaskStats(knowledgeBaseId?: string) {
+    try {
+      const endpoint = knowledgeBaseId ? `/tasks/${knowledgeBaseId}/stats` : '/tasks/stats';
+      return this.request<any>(endpoint);
+    } catch (error) {
+      console.error('Failed to fetch task stats:', error);
+      return {
+        total_tasks: 0,
+        pending_tasks: 0,
+        running_tasks: 0,
+        completed_tasks: 0,
+        failed_tasks: 0
+      };
+    }
+  }
+
+  async getTasks(knowledgeBaseId?: string, page: number = 1, size: number = 20) {
+    try {
+      const endpoint = knowledgeBaseId ? `/tasks/${knowledgeBaseId}/list` : '/tasks/list';
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString()
+      });
+      return this.request<any>(`${endpoint}?${params}`);
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+      return {
+        tasks: [],
+        total: 0,
+        page: 1,
+        size: 20,
+        total_pages: 0
+      };
+    }
+  }
+
+  // Knowledge Base Detail API
+  async getKnowledgeBaseDetail(id: string) {
+    try {
+      return this.request<any>(`/knowledge-bases/${id}`);
+    } catch (error) {
+      console.error('Failed to fetch knowledge base detail:', error);
+      throw error;
+    }
+  }
+
+  // Document Detail API
+  async getDocumentDetail(knowledgeBaseId: string, documentId: string) {
+    try {
+      return this.request<any>(`/knowledge-bases/${knowledgeBaseId}/documents/${documentId}`);
+    } catch (error) {
+      console.error('Failed to fetch document detail:', error);
+      throw error;
+    }
+  }
+
+  async getDocumentChunks(knowledgeBaseId: string, documentId: string) {
+    try {
+      return this.request<any>(`/knowledge-bases/${knowledgeBaseId}/documents/${documentId}/chunks`);
+    } catch (error) {
+      console.error('Failed to fetch document chunks:', error);
+      return [];
+    }
   }
 }
 
