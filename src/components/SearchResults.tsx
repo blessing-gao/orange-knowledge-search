@@ -2,6 +2,7 @@
 import { FileText, Layers, Clock, Tag, ExternalLink, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SearchResult } from "@/types/api";
 
 interface SearchResultsProps {
@@ -9,9 +10,22 @@ interface SearchResultsProps {
   loading: boolean;
   query: string;
   onViewDetails: (result: SearchResult) => void;
+  currentPage: number;
+  totalPages: number;
+  totalResults: number;
+  onPageChange: (page: number) => void;
 }
 
-export function SearchResults({ results, loading, query, onViewDetails }: SearchResultsProps) {
+export function SearchResults({ 
+  results, 
+  loading, 
+  query, 
+  onViewDetails,
+  currentPage,
+  totalPages,
+  totalResults,
+  onPageChange
+}: SearchResultsProps) {
   if (loading) {
     return (
       <div className="w-full max-w-4xl mx-auto space-y-4">
@@ -75,18 +89,58 @@ export function SearchResults({ results, loading, query, onViewDetails }: Search
     );
   };
 
+  const generatePageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push('...');
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-4">
+    <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Results Summary */}
       <div className="text-sm text-gray-600 mb-6">
-        找到 <span className="font-semibold text-primary">{results.length}</span> 个相关结果
+        找到 <span className="font-semibold text-primary">{totalResults}</span> 个相关结果
+        {totalPages > 1 && (
+          <span className="ml-2">
+            (第 {currentPage} 页，共 {totalPages} 页)
+          </span>
+        )}
       </div>
 
       {/* Results List */}
       <div className="space-y-4">
         {results.map((result, index) => (
           <div
-            key={`${result.type}-${result.id}`}
+            key={`${result.type}-${result.id}-${currentPage}`}
             className="search-card p-6 hover:shadow-lg transition-all duration-200 animate-slide-up"
             style={{ animationDelay: `${index * 50}ms` }}
           >
@@ -170,6 +224,57 @@ export function SearchResults({ results, loading, query, onViewDetails }: Search
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) onPageChange(currentPage - 1);
+                  }}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              
+              {generatePageNumbers().map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === '...' ? (
+                    <span className="px-3 py-2 text-gray-500">...</span>
+                  ) : (
+                    <PaginationLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onPageChange(page as number);
+                      }}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) onPageChange(currentPage + 1);
+                  }}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

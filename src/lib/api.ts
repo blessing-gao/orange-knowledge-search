@@ -1,9 +1,10 @@
 
-const API_BASE = '/api';
+const API_BASE = 'https://angfee0vu6-8889.cnb.run/api';
 
 export class ApiClient {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE}${endpoint}`;
+    console.log('Making request to:', url);
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -45,8 +46,8 @@ export class ApiClient {
   }
 
   // Document API
-  async getDocuments(knowledgeBaseId: string) {
-    return this.request<any[]>(`/knowledge-bases/${knowledgeBaseId}/documents`);
+  async getDocuments(knowledgeBaseId: string, page: number = 1, limit: number = 10) {
+    return this.request<any>(`/knowledge-bases/${knowledgeBaseId}/documents?page=${page}&limit=${limit}`);
   }
 
   async uploadDocument(knowledgeBaseId: string, file: File, tags?: string[]) {
@@ -74,14 +75,20 @@ export class ApiClient {
     });
   }
 
+  // Get tags for a specific knowledge base
+  async getTags(knowledgeBaseId?: string) {
+    const endpoint = knowledgeBaseId ? `/knowledge-bases/${knowledgeBaseId}/tags` : '/tags';
+    return this.request<string[]>(endpoint);
+  }
+
   // Search API
   async search(params: {
     query: string;
     knowledge_base_id?: string;
     result_type?: string;
     tags?: string[];
+    page?: number;
     limit?: number;
-    offset?: number;
   }) {
     const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {

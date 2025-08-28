@@ -12,6 +12,7 @@ interface SearchHeaderProps {
   selectedKnowledgeBase?: string;
   onKnowledgeBaseChange: (id: string) => void;
   onManageClick: () => void;
+  isLoadingKnowledgeBases?: boolean;
 }
 
 export function SearchHeader({
@@ -22,6 +23,7 @@ export function SearchHeader({
   selectedKnowledgeBase,
   onKnowledgeBaseChange,
   onManageClick,
+  isLoadingKnowledgeBases = false,
 }: SearchHeaderProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,10 +36,10 @@ export function SearchHeader({
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-4">
           <div className="w-12 h-12 search-gradient rounded-xl flex items-center justify-center text-white text-xl font-bold">
-            智
+            超
           </div>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">智能搜索系统</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">超融合智能搜索系统</h1>
         <p className="text-gray-600">基于知识库的智能文档检索平台</p>
       </div>
 
@@ -49,7 +51,7 @@ export function SearchHeader({
         </div>
         <Select value={selectedKnowledgeBase} onValueChange={onKnowledgeBaseChange}>
           <SelectTrigger className="w-64">
-            <SelectValue placeholder="选择知识库" />
+            <SelectValue placeholder={isLoadingKnowledgeBases ? "加载中..." : "选择知识库"} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全部知识库</SelectItem>
