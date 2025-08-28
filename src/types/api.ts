@@ -31,7 +31,7 @@ export interface DocumentSlice {
 }
 
 export interface SearchResult {
-  type: 'document' | 'slice';
+  type: 'document' | 'slice' | 'image' | 'video';
   id: string;
   title: string;
   content: string;
@@ -40,15 +40,21 @@ export interface SearchResult {
   score: number;
   highlights?: string[];
   metadata?: Record<string, any>;
+  preview_url?: string;
+  thumbnail_url?: string;
+  duration?: number; // for videos
+  dimensions?: { width: number; height: number }; // for images/videos
+  file_size?: number;
 }
 
 export interface SearchRequest {
   query: string;
   knowledge_base_id?: string;
-  result_type?: 'documents' | 'slices' | 'both';
+  result_type?: 'documents' | 'slices' | 'images' | 'videos' | 'both';
   tags?: string[];
   limit?: number;
   offset?: number;
+  page?: number;
 }
 
 export interface SearchResponse {
