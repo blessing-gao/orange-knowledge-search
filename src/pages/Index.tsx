@@ -91,12 +91,12 @@ const Index = () => {
         result_type: resultType === 'both' ? undefined : resultType,
         tags: selectedTags.length > 0 ? selectedTags : undefined,
         page,
-        limit: 10,
+        limit: searchMode === 'slice' ? 15 : 10, // 切片模式每页15条，其他模式10条
       });
       
       setSearchResults(response.results || []);
       setTotalResults(response.total || 0);
-      setTotalPages(Math.ceil((response.total || 0) / 10));
+      setTotalPages(Math.ceil((response.total || 0) / (searchMode === 'slice' ? 15 : 10)));
       setCurrentPage(page);
       
       toast({
@@ -181,10 +181,10 @@ const Index = () => {
         const matchesQuery = result.title.toLowerCase().includes(query.toLowerCase()) ||
                            result.content.toLowerCase().includes(query.toLowerCase());
         const matchesSearchMode = searchMode === 'both' || 
-                                 (searchMode === 'document' && result.type === 'document') ||
+                                 (searchMode === 'document' && result.type !== 'slice') ||
                                  (searchMode === 'slice' && result.type === 'slice');
         const matchesType = resultType === 'both' || 
-                           (resultType === 'documents' && (result.type === 'document' || result.type === 'image' || result.type === 'video')) ||
+                           (resultType === 'documents' && result.type !== 'slice') ||
                            (resultType === 'slices' && result.type === 'slice');
         const matchesTags = selectedTags.length === 0 || 
                            selectedTags.some(tag => result.tags?.includes(tag));
@@ -195,8 +195,8 @@ const Index = () => {
         return matchesQuery && matchesSearchMode && matchesType && matchesTags && matchesKB && matchesConfidence;
       });
 
-      // Pagination
-      const pageSize = 10;
+      // Pagination - 根据搜索模式调整每页数量
+      const pageSize = searchMode === 'slice' ? 15 : 10;
       const totalFilteredResults = filteredResults.length;
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
@@ -326,6 +326,7 @@ const Index = () => {
           totalPages={totalPages}
           totalResults={totalResults}
           onPageChange={handlePageChange}
+          searchMode={searchMode}
         />
 
         {/* Enhanced Empty State */}

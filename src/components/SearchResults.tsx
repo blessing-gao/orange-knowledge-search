@@ -3,6 +3,7 @@ import { FileText } from "lucide-react";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { SearchResult } from "@/types/api";
 import { SearchResultTabs } from "./SearchResultTabs";
+import { SliceCard } from "./SliceCard";
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -13,6 +14,7 @@ interface SearchResultsProps {
   totalPages: number;
   totalResults: number;
   onPageChange: (page: number) => void;
+  searchMode: string;
 }
 
 export function SearchResults({ 
@@ -23,29 +25,55 @@ export function SearchResults({
   currentPage,
   totalPages,
   totalResults,
-  onPageChange
+  onPageChange,
+  searchMode
 }: SearchResultsProps) {
   if (loading) {
-    return (
-      <div className="w-full max-w-6xl mx-auto space-y-6">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="search-card p-8 animate-pulse">
-            <div className="flex items-start gap-6">
-              <div className="w-14 h-14 bg-gray-200 rounded-xl"></div>
-              <div className="flex-1 space-y-4">
-                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="space-y-3">
+    // 根据搜索模式显示不同的加载动画
+    if (searchMode === 'slice') {
+      return (
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="search-card p-6 animate-pulse h-80">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                  <div className="w-16 h-6 bg-gray-200 rounded"></div>
+                </div>
+                <div className="h-6 bg-gray-200 rounded mb-3"></div>
+                <div className="space-y-2 mb-4">
                   <div className="h-4 bg-gray-200 rounded"></div>
                   <div className="h-4 bg-gray-200 rounded w-4/5"></div>
                   <div className="h-4 bg-gray-200 rounded w-3/5"></div>
                 </div>
+                <div className="h-8 bg-gray-200 rounded mt-auto"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="w-full max-w-6xl mx-auto space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="search-card p-8 animate-pulse">
+              <div className="flex items-start gap-6">
+                <div className="w-14 h-14 bg-gray-200 rounded-xl"></div>
+                <div className="flex-1 space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="space-y-3">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded w-4/5"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/5"></div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-    );
+          ))}
+        </div>
+      );
+    }
   }
 
   if (results.length === 0 && query) {
@@ -120,9 +148,13 @@ export function SearchResults({
     return pages;
   };
 
+  // 分离切片和文档结果
+  const sliceResults = results.filter(r => r.type === 'slice');
+  const documentResults = results.filter(r => r.type !== 'slice');
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-8">
-      {/* 搜索统计信息 - 更大气的设计 */}
+      {/* 搜索统计信息 */}
       <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/10">
         <div className="flex items-center justify-between">
           <div>
@@ -144,14 +176,59 @@ export function SearchResults({
         </div>
       </div>
 
-      {/* 搜索结果标签页 */}
-      <SearchResultTabs
-        results={results}
-        query={query}
-        onViewDetails={onViewDetails}
-      />
+      {/* 根据搜索模式显示不同布局 */}
+      {searchMode === 'slice' ? (
+        // 切片结果 - 3列卡片布局
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sliceResults.map((result, index) => (
+            <SliceCard
+              key={result.id}
+              result={result}
+              query={query}
+              onViewDetails={onViewDetails}
+            />
+          ))}
+        </div>
+      ) : searchMode === 'document' ? (
+        // 文档结果 - 列表布局
+        <SearchResultTabs
+          results={documentResults}
+          query={query}
+          onViewDetails={onViewDetails}
+        />
+      ) : (
+        // 混合模式 - 分别显示
+        <div className="space-y-8">
+          {sliceResults.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">切片结果</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sliceResults.map((result, index) => (
+                  <SliceCard
+                    key={result.id}
+                    result={result}
+                    query={query}
+                    onViewDetails={onViewDetails}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {documentResults.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">文档结果</h3>
+              <SearchResultTabs
+                results={documentResults}
+                query={query}
+                onViewDetails={onViewDetails}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* 分页组件 - 更精致的设计 */}
+      {/* 分页组件 */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-12">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2">

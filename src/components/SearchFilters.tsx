@@ -58,11 +58,11 @@ export function SearchFilters({
               </Select>
             </div>
 
-            {/* 结果类型 */}
+            {/* 结果类型 - 修正为切片和文档切片 */}
             <div className="flex items-center gap-3">
               <span className="text-sm text-gray-600 whitespace-nowrap">结果类型:</span>
               <Select value={resultType} onValueChange={onResultTypeChange}>
-                <SelectTrigger className="w-32 h-9">
+                <SelectTrigger className="w-36 h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -72,16 +72,16 @@ export function SearchFilters({
                       全部
                     </div>
                   </SelectItem>
-                  <SelectItem value="documents">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-3 h-3" />
-                      文档
-                    </div>
-                  </SelectItem>
                   <SelectItem value="slices">
                     <div className="flex items-center gap-2">
                       <Layers className="w-3 h-3" />
-                      片段
+                      切片
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="documents">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-3 h-3" />
+                      文档切片
                     </div>
                   </SelectItem>
                 </SelectContent>
