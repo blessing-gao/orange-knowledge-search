@@ -1,4 +1,3 @@
-
 const API_BASE = '/api';
 
 export class ApiClient {
@@ -22,7 +21,9 @@ export class ApiClient {
 
   // Knowledge Base API
   async getKnowledgeBases() {
-    return this.request<any[]>('/knowledge-bases');
+    const response = await this.request<{knowledge_bases: any[], total: number, page: number, size: number}>('/knowledge-bases');
+    // Extract the knowledge_bases array from the response
+    return response.knowledge_bases || [];
   }
 
   async createKnowledgeBase(data: { name: string; description?: string }) {

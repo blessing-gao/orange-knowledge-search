@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { SearchHeader } from "@/components/SearchHeader";
@@ -23,10 +22,21 @@ const Index = () => {
   
   const { toast } = useToast();
 
-  // Fetch knowledge bases
+  // Fetch knowledge bases with proper error handling
   const { data: knowledgeBases = [], error: knowledgeBasesError, isLoading: isLoadingKB } = useQuery({
     queryKey: ['knowledge-bases'],
-    queryFn: () => apiClient.getKnowledgeBases(),
+    queryFn: async () => {
+      try {
+        console.log('Fetching knowledge bases...');
+        const result = await apiClient.getKnowledgeBases();
+        console.log('Knowledge bases fetched:', result);
+        return Array.isArray(result) ? result : [];
+      } catch (error) {
+        console.error('Failed to fetch knowledge bases:', error);
+        // Return empty array as fallback
+        return [];
+      }
+    },
   });
 
   // Fetch tags based on selected knowledge base
