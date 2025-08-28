@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,16 +53,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				sidebar: {
-					DEFAULT: 'hsl(var(--sidebar-background))',
-					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
-					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-					accent: 'hsl(var(--sidebar-accent))',
-					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-					border: 'hsl(var(--sidebar-border))',
-					ring: 'hsl(var(--sidebar-ring))'
-				}
+				'orange-red': {
+					50: 'hsl(var(--orange-red-50))',
+					100: 'hsl(var(--orange-red-100))',
+					200: 'hsl(var(--orange-red-200))',
+					300: 'hsl(var(--orange-red-300))',
+					400: 'hsl(var(--orange-red-400))',
+					500: 'hsl(var(--orange-red-500))',
+					600: 'hsl(var(--orange-red-600))',
+					700: 'hsl(var(--orange-red-700))',
+					800: 'hsl(var(--orange-red-800))',
+					900: 'hsl(var(--orange-red-900))',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +87,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-orange': {
+					'0%, 100%': {
+						boxShadow: '0 0 0 0 hsl(14 100% 57% / 0.7)'
+					},
+					'50%': {
+						boxShadow: '0 0 0 10px hsl(14 100% 57% / 0)'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-orange': 'pulse-orange 2s infinite',
+				'slide-up': 'slide-up 0.3s ease-out'
 			}
 		}
 	},

@@ -1,10 +1,9 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* 智能搜索系统设计系统 - 橙红色主题 */
 
 @layer base {
   :root {
@@ -17,80 +16,69 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* 橙红色主题色系 */
+    --primary: 14 100% 57%;  /* #FF6B35 */
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 14 89% 89%;  /* 浅橙红色 */
+    --accent-foreground: 14 100% 57%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 14 100% 57%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* 自定义橙红色变体 */
+    --orange-red-50: 14 100% 97%;
+    --orange-red-100: 14 100% 94%;
+    --orange-red-200: 14 100% 87%;
+    --orange-red-300: 14 100% 80%;
+    --orange-red-400: 14 100% 67%;
+    --orange-red-500: 14 100% 57%;  /* 主色 */
+    --orange-red-600: 14 100% 47%;
+    --orange-red-700: 14 91% 37%;
+    --orange-red-800: 14 83% 27%;
+    --orange-red-900: 14 75% 17%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* 渐变定义 */
+    --gradient-primary: linear-gradient(135deg, hsl(14 100% 57%) 0%, hsl(8 89% 58%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(14 100% 97%) 0%, hsl(14 100% 94%) 100%);
+    
+    /* 搜索相关色彩 */
+    --search-highlight: 14 100% 87%;
+    --knowledge-base: 220 13% 95%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
+    --primary: 14 100% 57%;
     --primary-foreground: 222.2 47.4% 11.2%;
-
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --ring: 14 100% 57%;
   }
 }
 
@@ -100,6 +88,25 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  .search-gradient {
+    background: var(--gradient-primary);
+  }
+  
+  .search-card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200;
+  }
+  
+  .knowledge-tag {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-red-100 text-orange-red-700 hover:bg-orange-red-200 transition-colors;
+  }
+  
+  .search-highlight {
+    @apply bg-orange-red-200 text-orange-red-900 px-1 rounded;
   }
 }
