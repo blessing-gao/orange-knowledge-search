@@ -1,4 +1,3 @@
-
 import { Search, Database, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,11 +29,10 @@ export function SearchHeader({
     onSearch();
   };
 
-  // Ensure knowledgeBases is always an array
   const safeKnowledgeBases = Array.isArray(knowledgeBases) ? knowledgeBases : [];
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       {/* Logo and Title */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-4">
@@ -43,7 +41,7 @@ export function SearchHeader({
           </div>
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">超融合智能搜索系统</h1>
-        <p className="text-gray-600">基于知识库的智能文档检索平台</p>
+        <p className="text-gray-600">基于向量数据库和语义理解的企业级知识检索平台</p>
       </div>
 
       {/* Knowledge Base Selector */}
@@ -65,15 +63,6 @@ export function SearchHeader({
             ))}
           </SelectContent>
         </Select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onManageClick}
-          className="ml-auto"
-        >
-          <Settings className="w-4 h-4 mr-2" />
-          管理
-        </Button>
       </div>
 
       {/* Search Form */}

@@ -1,8 +1,8 @@
-
 import { FileText, Layers, Image, Video, ExternalLink, Eye, Calendar, User, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SearchResult } from "@/types/api";
+import { MarkdownHighlight } from "./MarkdownHighlight";
 
 interface ResultTypeCardProps {
   result: SearchResult;
@@ -12,23 +12,6 @@ interface ResultTypeCardProps {
 }
 
 export function ResultTypeCard({ result, query, onViewDetails, index }: ResultTypeCardProps) {
-  const highlightText = (text: string, query: string) => {
-    if (!query.trim()) return text;
-    
-    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    const parts = text.split(regex);
-    
-    return parts.map((part, index) => 
-      regex.test(part) ? (
-        <span key={index} className="search-highlight">
-          {part}
-        </span>
-      ) : (
-        part
-      )
-    );
-  };
-
   const getTypeIcon = () => {
     switch (result.type) {
       case 'document':
@@ -93,7 +76,7 @@ export function ResultTypeCard({ result, query, onViewDetails, index }: ResultTy
           <div className="flex items-start justify-between gap-6 mb-4">
             <div className="flex-1">
               <h3 className="text-xl font-bold text-gray-900 mb-2 break-words leading-tight">
-                {highlightText(result.title, query)}
+                <MarkdownHighlight content={result.title} query={query} />
               </h3>
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <Badge variant="outline" className={`text-xs font-medium ${getTypeColor()}`}>
@@ -158,18 +141,18 @@ export function ResultTypeCard({ result, query, onViewDetails, index }: ResultTy
             </div>
           )}
 
-          {/* Content Preview */}
+          {/* Content Preview with Markdown highlighting */}
           <div className="mb-6">
-            <p className="text-gray-700 leading-relaxed text-base line-clamp-3">
-              {highlightText(result.content, query)}
-            </p>
+            <div className="text-gray-700 leading-relaxed text-base line-clamp-3">
+              <MarkdownHighlight content={result.content} query={query} />
+            </div>
             {result.highlights && result.highlights.length > 0 && (
               <div className="mt-3 p-3 bg-orange-red-50 rounded-lg border border-orange-red-100">
                 <span className="text-sm font-medium text-orange-red-800 block mb-1">相关片段:</span>
                 <div className="space-y-1">
                   {result.highlights.slice(0, 2).map((highlight, idx) => (
                     <div key={idx} className="text-sm text-orange-red-700">
-                      "{highlightText(highlight, query)}"
+                      "<MarkdownHighlight content={highlight} query={query} />"
                     </div>
                   ))}
                 </div>

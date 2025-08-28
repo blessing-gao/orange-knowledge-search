@@ -6,6 +6,8 @@ export interface KnowledgeBase {
   created_at: string;
   updated_at: string;
   document_count?: number;
+  file_count?: number;
+  source_path?: string;
 }
 
 export interface Document {
@@ -19,6 +21,7 @@ export interface Document {
   metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
+  chunk_count?: number;
 }
 
 export interface DocumentSlice {
@@ -28,6 +31,9 @@ export interface DocumentSlice {
   metadata?: Record<string, any>;
   embedding_vector?: number[];
   created_at: string;
+  chunk_index: number;
+  start_position: number;
+  end_position: number;
 }
 
 export interface SearchResult {
@@ -42,9 +48,12 @@ export interface SearchResult {
   metadata?: Record<string, any>;
   preview_url?: string;
   thumbnail_url?: string;
-  duration?: number; // for videos
-  dimensions?: { width: number; height: number }; // for images/videos
+  duration?: number;
+  dimensions?: { width: number; height: number };
   file_size?: number;
+  document_id?: string;
+  knowledge_base_id?: string;
+  chunk_index?: number;
 }
 
 export interface SearchRequest {
@@ -61,4 +70,18 @@ export interface SearchResponse {
   results: SearchResult[];
   total: number;
   query_time: number;
+}
+
+export interface Task {
+  id: string;
+  type: 'index' | 'upload' | 'delete' | 'rebuild';
+  title: string;
+  description: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  knowledge_base_id?: string;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  error_message?: string;
 }
