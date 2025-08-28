@@ -19,7 +19,7 @@ export function SearchHeader({
   query,
   onQueryChange,
   onSearch,
-  knowledgeBases,
+  knowledgeBases = [],
   selectedKnowledgeBase,
   onKnowledgeBaseChange,
   onManageClick,
@@ -29,6 +29,9 @@ export function SearchHeader({
     e.preventDefault();
     onSearch();
   };
+
+  // Ensure knowledgeBases is always an array
+  const safeKnowledgeBases = Array.isArray(knowledgeBases) ? knowledgeBases : [];
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -55,7 +58,7 @@ export function SearchHeader({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全部知识库</SelectItem>
-            {knowledgeBases.map((kb) => (
+            {safeKnowledgeBases.map((kb) => (
               <SelectItem key={kb.id} value={kb.id}>
                 {kb.name}
               </SelectItem>
