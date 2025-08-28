@@ -96,7 +96,7 @@ export class ApiClient {
     }
   }
 
-  // Search API - 修正搜索接口调用
+  // Search API - 修正搜索接口调用，使用知识库特定的搜索端点
   async search(params: {
     query: string;
     knowledge_base_id?: string;
@@ -106,41 +106,77 @@ export class ApiClient {
     limit?: number;
   }) {
     try {
-      // 构建搜索请求 - 可能需要POST方法而不是GET
-      const searchData = {
-        query: params.query,
-        knowledge_base_id: params.knowledge_base_id,
-        result_type: params.result_type,
-        tags: params.tags,
-        page: params.page || 1,
-        limit: params.limit || 10
-      };
+      // 如果指定了知识库ID，使用知识库特定的搜索端点
+      if (params.knowledge_base_id) {
+        const searchData = {
+          query: params.query,
+          result_type: params.result_type,
+          tags: params.tags,
+          page: params.page || 1,
+          limit: params.limit || 10
+        };
 
-      console.log('Search request data:', searchData);
+        console.log('Knowledge base specific search request:', searchData);
 
-      // 尝试POST请求
-      const response = await this.request<any>('/search', {
-        method: 'POST',
-        body: JSON.stringify(searchData),
-      });
+        // 尝试POST请求到知识库特定端点
+        try {
+          const response = await this.request<any>(`/knowledge-bases/${params.knowledge_base_id}/search`, {
+            method: 'POST',
+            body: JSON.stringify(searchData),
+          });
+          return response;
+        } catch (error) {
+          console.error('POST to KB search failed, trying GET:', error);
+          
+          // 如果POST失败，尝试GET请求
+          const queryParams = new URLSearchParams();
+          queryParams.append('query', params.query);
+          if (params.result_type) queryParams.append('result_type', params.result_type);
+          if (params.tags && params.tags.length > 0) queryParams.append('tags', JSON.stringify(params.tags));
+          queryParams.append('page', (params.page || 1).toString());
+          queryParams.append('limit', (params.limit || 10).toString());
 
-      return response;
-    } catch (error) {
-      console.error('POST search failed, trying GET:', error);
-      
-      // 如果POST失败，回退到GET请求
-      const queryParams = new URLSearchParams();
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          if (Array.isArray(value)) {
-            queryParams.append(key, JSON.stringify(value));
-          } else {
-            queryParams.append(key, value.toString());
-          }
+          return this.request<any>(`/knowledge-bases/${params.knowledge_base_id}/search?${queryParams}`);
         }
-      });
+      } else {
+        // 全局搜索，尝试不同的端点
+        const searchData = {
+          query: params.query,
+          result_type: params.result_type,
+          tags: params.tags,
+          page: params.page || 1,
+          limit: params.limit || 10
+        };
 
-      return this.request<any>(`/search?${queryParams}`);
+        console.log('Global search request:', searchData);
+
+        // 尝试全局搜索端点
+        try {
+          const response = await this.request<any>('/search', {
+            method: 'POST',
+            body: JSON.stringify(searchData),
+          });
+          return response;
+        } catch (error) {
+          console.error('Global POST search failed, trying global GET:', error);
+          
+          const queryParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && key !== 'knowledge_base_id') {
+              if (Array.isArray(value)) {
+                queryParams.append(key, JSON.stringify(value));
+              } else {
+                queryParams.append(key, value.toString());
+              }
+            }
+          });
+
+          return this.request<any>(`/search?${queryParams}`);
+        }
+      }
+    } catch (error) {
+      console.error('All search attempts failed:', error);
+      throw error;
     }
   }
 
