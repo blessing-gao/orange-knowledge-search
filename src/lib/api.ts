@@ -1,5 +1,5 @@
 
-const API_BASE = 'https://angfee0vu6-8889.cnb.run/api';
+const API_BASE = '/api';
 
 export class ApiClient {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
